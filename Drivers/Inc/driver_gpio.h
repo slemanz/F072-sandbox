@@ -98,7 +98,35 @@ typedef struct
  *                  for more information check the function definitions
  ********************************************************************************************/
 
-void GPIO_Init(void);
+/*
+ * Pin helper (runtime)
+ */
 
+gpio_pin_t gpio_pin(GPIO_TypeDef *port, uint8_t number);
+
+/*
+ * Init and De-init
+ */
+
+void gpio_init(const gpio_config_t *config);
+void gpio_init_table(const gpio_config_t *table, uint32_t len);
+void gpio_deinit(gpio_pin_t pin);
+
+/*
+ * Runtime configuration
+ */
+
+void gpio_set_mode(gpio_pin_t pin, gpio_mode_e mode);
+void gpio_set_pull(gpio_pin_t pin, gpio_pull_e pull);
+
+/*
+ * Data read and write
+ */
+
+void gpio_set(gpio_pin_t pin);
+void gpio_clear(gpio_pin_t pin);
+void gpio_write(gpio_pin_t pin, gpio_state_e state);
+gpio_state_e gpio_read(gpio_pin_t pin);
+void gpio_toggle(gpio_pin_t pin);
 
 #endif /* INC_DRIVER_GPIO_H_ */
