@@ -1,0 +1,19 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "C_Cpp.default.compilerPath": "arm-none-eabi-gcc",
+        "C_Cpp.default.intelliSenseMode": "gcc-arm",
+        "C_Cpp.default.defines": [
+            "STM32F072xB"
+        ],
+        "C_Cpp.default.includePath": [
+            "${workspaceFolder}/App/Inc",
+            "${workspaceFolder}/Drivers/Inc",
+            "${workspaceFolder}/Drivers/Device/cmsis/Inc"
+        ]
+    }
+}
