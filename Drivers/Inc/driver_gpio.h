@@ -2,7 +2,6 @@
 #define INC_DRIVER_GPIO_H_
 
 #include <stdint.h>
-#include <stdbool.h>
 #include "stm32f072xb.h"
 
 /**
@@ -82,16 +81,16 @@ typedef enum
 /**
  * @brief GPIO pin configuration.
  */
-typedef struct
-{
-    gpio_pin_t   pin;
-    gpio_mode_e  mode;
-    gpio_otype_e otype;
-    gpio_speed_e speed;
-    gpio_pull_e  pull;
-    gpio_af_e    af;
-    bool         initial;   
-} gpio_config_t;
+ typedef struct
+  {
+      gpio_pin_t   pin;           /**< Pin to configure                     */
+      gpio_mode_e  mode;          /**< Pin mode                             */
+      gpio_otype_e otype;         /**< Output type                          */
+      gpio_speed_e speed;         /**< Output speed                         */
+      gpio_pull_e  pull;          /**< Pull resistor                        */
+      gpio_af_e    af;            /**< Alternate function                   */
+      gpio_state_e init_state;    /**< Output level applied before enabling */
+  }gpio_config_t;
 
 /********************************************************************************************
  *                              APIs supported by this driver
@@ -113,13 +112,16 @@ void gpio_init_table(const gpio_config_t *table, uint32_t len);
 void gpio_deinit(gpio_pin_t pin);
 
 /*
- * Runtime configuration
+ * Configuration
  */
 
 void gpio_set_mode(gpio_pin_t pin, gpio_mode_e mode);
 void gpio_set_pull(gpio_pin_t pin, gpio_pull_e pull);
+void gpio_set_otype(gpio_pin_t pin, gpio_otype_e otype);
+void gpio_set_speed(gpio_pin_t pin, gpio_speed_e speed);
+void gpio_set_af(gpio_pin_t pin, gpio_af_e af);
 
-/*
+/**
  * Data read and write
  */
 
