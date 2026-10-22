@@ -1,22 +1,37 @@
 #include "driver_gpio.h"
-#include "stm32f0xx.h"
 
-/**
- * PRIVATE HELPERS
+/*
+ * Private Helpers
  */
 
-static void gpio_enable_clock(GPIO_TypeDef *port)
+static uint32_t gpio_clock_bit(GPIO_TypeDef *port)
 {
-    if      (port == GPIOA) RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
-    else if (port == GPIOB) RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
-    else if (port == GPIOC) RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
-    else if (port == GPIOD) RCC->AHBENR |= RCC_AHBENR_GPIODEN;
-    else if (port == GPIOE) RCC->AHBENR |= RCC_AHBENR_GPIOEEN;
-    else if (port == GPIOF) RCC->AHBENR |= RCC_AHBENR_GPIOFEN;
+    if      (port == GPIOA) return RCC_AHBENR_GPIOAEN;
+    else if (port == GPIOB) return RCC_AHBENR_GPIOBEN;
+    else if (port == GPIOC) return RCC_AHBENR_GPIOCEN;
+    else if (port == GPIOD) return RCC_AHBENR_GPIODEN;
+    else if (port == GPIOE) return RCC_AHBENR_GPIOEEN;
+    else if (port == GPIOF) return RCC_AHBENR_GPIOFEN;
+
+    return 0;
 }
 
-/**
- * Implementations
+/*
+ * Clock control
+ */
+
+void gpio_clock_enable(GPIO_TypeDef *port)
+{
+    RCC->AHBENR |= gpio_clock_bit(port);
+}
+
+void gpio_clock_disable(GPIO_TypeDef *port)
+{
+    RCC->AHBENR &= ~gpio_clock_bit(port);
+}
+
+/*
+ * Configuration
  */
 
 void gpio_set_mode(gpio_pin_t pin, gpio_mode_e mode)
@@ -52,12 +67,13 @@ void gpio_set_af(gpio_pin_t pin, gpio_af_e af)
     pin.port->AFR[reg] |=  ((uint32_t)af << pos);
 }
 
+/*
+ * Init and De-init
+ */
 
 void gpio_init(const gpio_config_t *config)
 {
-    GPIO_TypeDef *port = config->pin.port;
-
-    gpio_enable_clock(port);
+    gpio_enable_clock(config->pin.port);
 
     gpio_write(config->pin, config->init_state);
 
@@ -68,18 +84,61 @@ void gpio_init(const gpio_config_t *config)
     gpio_set_mode(config->pin, config->mode);
 }
 
-/**
+gpio_pin_t gpio_pin(GPIO_TypeDef *port, gpio_pin_number_e number)
+{
+    gpio_pin_t pin;
+
+    pin.port   = port;
+    pin.number = number;
+
+    return pin;
+}
+
+void gpio_init_table(const gpio_config_t *table, uint32_t len)
+{
+    for(uint32_t i = 0; i < len; i++)
+    {
+        gpio_init(&table[i]);
+    }
+}
+
+void gpio_deinit(gpio_pin_t pin)
+{
+    gpio_set_mode(pin, GPIO_MODE_INPUT);
+    gpio_set_otype(pin, GPIO_OTYPE_PP);
+    gpio_set_speed(pin, GPIO_SPEED_LOW);
+    gpio_set_pull(pin, GPIO_PULL_NONE);
+    gpio_set_af(pin, GPIO_AF0);
+    gpio_clear(pin);
+}
+
+void gpio_port_reset(GPIO_TypeDef *port)
+{
+    uint32_t reset_bit = 0;
+
+    if      (port == GPIOA) reset_bit = RCC_AHBRSTR_GPIOARST;
+    else if (port == GPIOB) reset_bit = RCC_AHBRSTR_GPIOBRST;
+    else if (port == GPIOC) reset_bit = RCC_AHBRSTR_GPIOCRST;
+    else if (port == GPIOD) reset_bit = RCC_AHBRSTR_GPIODRST;
+    else if (port == GPIOE) reset_bit = RCC_AHBRSTR_GPIOERST;
+    else if (port == GPIOF) reset_bit = RCC_AHBRSTR_GPIOFRST;
+
+    RCC->AHBRSTR |=  reset_bit;     /* hold port in reset */
+    RCC->AHBRSTR &= ~reset_bit;     /* release reset */
+}
+
+/*
  * Data read and write
  */
 
 void gpio_set(gpio_pin_t pin)
 {
-    pin.port->BSRR = (1 << pin.number);
+    pin.port->BSRR = (1U << pin.number);
 }
 
 void gpio_clear(gpio_pin_t pin)
 {
-    pin.port->BRR = (1 << pin.number);
+    pin.port->BRR = (1U << pin.number);
 }
 
 void gpio_write(gpio_pin_t pin, gpio_state_e state)

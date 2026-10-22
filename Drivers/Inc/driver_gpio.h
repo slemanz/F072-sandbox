@@ -2,15 +2,38 @@
 #define INC_DRIVER_GPIO_H_
 
 #include <stdint.h>
-#include "stm32f072xb.h"
+#include "stm32f0xx.h"
+
+/**
+ * @brief GPIO pin number inside a port
+ */
+typedef enum
+{
+    GPIO_PIN_0 = 0,
+    GPIO_PIN_1,
+    GPIO_PIN_2,
+    GPIO_PIN_3,
+    GPIO_PIN_4,
+    GPIO_PIN_5,
+    GPIO_PIN_6,
+    GPIO_PIN_7,
+    GPIO_PIN_8,
+    GPIO_PIN_9,
+    GPIO_PIN_10,
+    GPIO_PIN_11,
+    GPIO_PIN_12,
+    GPIO_PIN_13,
+    GPIO_PIN_14,
+    GPIO_PIN_15
+}gpio_pin_number_e;
 
 /**
  * @brief GPIO pin identification (port + pin number)
  */
 typedef struct
 {
-    GPIO_TypeDef *port;
-    uint8_t       number;      /* 0..15 */
+    GPIO_TypeDef       *port;
+    gpio_pin_number_e   number;
 }gpio_pin_t;
 
 /**
@@ -81,16 +104,16 @@ typedef enum
 /**
  * @brief GPIO pin configuration.
  */
- typedef struct
-  {
-      gpio_pin_t   pin;           /**< Pin to configure                     */
-      gpio_mode_e  mode;          /**< Pin mode                             */
-      gpio_otype_e otype;         /**< Output type                          */
-      gpio_speed_e speed;         /**< Output speed                         */
-      gpio_pull_e  pull;          /**< Pull resistor                        */
-      gpio_af_e    af;            /**< Alternate function                   */
-      gpio_state_e init_state;    /**< Output level applied before enabling */
-  }gpio_config_t;
+typedef struct
+{
+    gpio_pin_t   pin;           /**< Pin to configure                     */
+    gpio_mode_e  mode;          /**< Pin mode                             */
+    gpio_otype_e otype;         /**< Output type                          */
+    gpio_speed_e speed;         /**< Output speed                         */
+    gpio_pull_e  pull;          /**< Pull resistor                        */
+    gpio_af_e    af;            /**< Alternate function                   */
+    gpio_state_e init_state;    /**< Output level applied before enabling */
+}gpio_config_t;
 
 /********************************************************************************************
  *                              APIs supported by this driver
@@ -101,7 +124,7 @@ typedef enum
  * Pin helper (runtime)
  */
 
-gpio_pin_t gpio_pin(GPIO_TypeDef *port, uint8_t number);
+gpio_pin_t gpio_pin(GPIO_TypeDef *port, gpio_pin_number_e number);
 
 /*
  * Init and De-init
@@ -110,6 +133,7 @@ gpio_pin_t gpio_pin(GPIO_TypeDef *port, uint8_t number);
 void gpio_init(const gpio_config_t *config);
 void gpio_init_table(const gpio_config_t *table, uint32_t len);
 void gpio_deinit(gpio_pin_t pin);
+void gpio_port_reset(GPIO_TypeDef *port);
 
 /*
  * Configuration
@@ -121,7 +145,7 @@ void gpio_set_otype(gpio_pin_t pin, gpio_otype_e otype);
 void gpio_set_speed(gpio_pin_t pin, gpio_speed_e speed);
 void gpio_set_af(gpio_pin_t pin, gpio_af_e af);
 
-/**
+/*
  * Data read and write
  */
 
