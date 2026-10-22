@@ -5,7 +5,7 @@
  * PRIVATE HELPERS
  */
 
-static void enable_clock(GPIO_TypeDef *port)
+static void gpio_enable_clock(GPIO_TypeDef *port)
 {
     if      (port == GPIOA) RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
     else if (port == GPIOB) RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
@@ -22,26 +22,50 @@ static void enable_clock(GPIO_TypeDef *port)
 void gpio_set_mode(gpio_pin_t pin, gpio_mode_e mode)
 {
     pin.port->MODER &= ~(0x3U << (pin.number * 2));
-    pin.port->MODER |=  (mode << (pin.number * 2));
+    pin.port->MODER |=  ((uint32_t)mode << (pin.number * 2));
 }
 
 void gpio_set_pull(gpio_pin_t pin, gpio_pull_e pull)
 {
     pin.port->PUPDR &= ~(0x3U << (pin.number * 2));
-    pin.port->PUPDR |=  (pull << (pin.number * 2));
+    pin.port->PUPDR |=  ((uint32_t)pull << (pin.number * 2));
 }
+
+void gpio_set_otype(gpio_pin_t pin, gpio_otype_e otype)
+{
+    pin.port->OTYPER &= ~(0x1U << pin.number);
+    pin.port->OTYPER |=  ((uint32_t)otype << pin.number);
+}
+
+void gpio_set_speed(gpio_pin_t pin, gpio_speed_e speed)
+{
+    pin.port->OSPEEDR &= ~(0x3U << (pin.number * 2));
+    pin.port->OSPEEDR |=  ((uint32_t)speed << (pin.number * 2));
+}
+
+void gpio_set_af(gpio_pin_t pin, gpio_af_e af)
+{
+    uint8_t reg = pin.number / 8;          /* AFR[0]: pins 0..7, AFR[1]: pins 8..15 */
+    uint8_t pos = (pin.number % 8) * 4;    /* 4 bits per pin */
+
+    pin.port->AFR[reg] &= ~(0xFU << pos);
+    pin.port->AFR[reg] |=  ((uint32_t)af << pos);
+}
+
 
 void gpio_init(const gpio_config_t *config)
 {
     GPIO_TypeDef *port = config->pin.port;
-    uint8_t pin_number = config->pin.number;
 
-    enable_clock(port);
+    gpio_enable_clock(port);
 
     gpio_write(config->pin, config->init_state);
 
-    
-
+    gpio_set_otype(config->pin, config->otype);
+    gpio_set_speed(config->pin, config->speed);
+    gpio_set_pull(config->pin, config->pull);
+    gpio_set_af(config->pin, config->af);
+    gpio_set_mode(config->pin, config->mode);
 }
 
 /**
