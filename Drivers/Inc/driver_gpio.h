@@ -127,6 +127,13 @@ typedef struct
 gpio_pin_t gpio_pin(GPIO_TypeDef *port, gpio_pin_number_e number);
 
 /*
+ * Clock control
+ */
+
+void gpio_clock_enable(GPIO_TypeDef *port);
+void gpio_clock_disable(GPIO_TypeDef *port);
+
+/*
  * Init and De-init
  */
 

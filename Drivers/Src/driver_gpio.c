@@ -73,7 +73,7 @@ void gpio_set_af(gpio_pin_t pin, gpio_af_e af)
 
 void gpio_init(const gpio_config_t *config)
 {
-    gpio_enable_clock(config->pin.port);
+    gpio_clock_enable(config->pin.port);
 
     gpio_write(config->pin, config->init_state);
 
