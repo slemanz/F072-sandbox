@@ -23,6 +23,7 @@ OBJS += $(DIR_BUILD)/syscalls.o
 
 DRIVERS += $(DIR_BUILD)/driver_gpio.o
 DRIVERS += $(DIR_BUILD)/driver_systick.o
+DRIVERS += $(DIR_BUILD)/driver_uart.o
 
 PREREQ = $(DIR_BUILD)/
 
