@@ -88,6 +88,8 @@ void uart_set_stop_bits(USART_TypeDef *instance, uart_stop_bits_e stop_bits)
 
 void uart_set_baudrate(USART_TypeDef *instance, uint32_t clock_hz, uint32_t baudrate)
 {
+    if(baudrate == 0) return;
+
     bool uart_was_enabled = uart_is_enabled(instance);
     uart_set_enabled(instance, false);
 
@@ -128,22 +130,36 @@ void uart_deinit(USART_TypeDef *instance)
 
 void uart_write_byte(USART_TypeDef *instance, uint8_t byte)
 {
-
+    while(!(instance->ISR & USART_ISR_TXE))
+    {
+        /* wait transmit register empty */
+    } 
+    instance->TDR = byte;
 }
 
 void uart_write(USART_TypeDef *instance, const uint8_t *data, uint32_t len)
 {
-
+    for(uint32_t i = 0; i < len; i++)
+    {
+        uart_write_byte(instance, data[i]);
+    }
 }
 
 void uart_write_string(USART_TypeDef *instance, const char *str)
 {
-
+    while(*str != '\0')
+    {
+        uart_write_byte(instance, (uint8_t)*str);
+        str++;
+    }
 }
 
 void uart_flush(USART_TypeDef *instance)
 {
-
+    while(!(instance->ISR & USART_ISR_TC))
+    {
+        /* wait transmission complete */
+    } 
 }
 
 /*
@@ -152,5 +168,16 @@ void uart_flush(USART_TypeDef *instance)
 
 bool uart_read_byte(USART_TypeDef *instance, uint8_t *byte)
 {
-    
+    if(instance->ISR & USART_ISR_ORE)
+    {
+        instance->ICR = USART_ICR_ORECF;
+    }
+
+    if(!(instance->ISR & USART_ISR_RXNE))
+    {
+        return false;
+    }
+
+    *byte = (uint8_t)instance->RDR;
+    return true;
 }

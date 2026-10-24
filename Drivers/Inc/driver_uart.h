@@ -39,7 +39,7 @@ typedef enum
  */
 typedef struct
 {
-    USART_TypeDef    *instance;         /**< USART1..USART4                  */
+    USART_TypeDef    *instance;     /**< USART1..USART4                  */
     uint32_t          clock_hz;     /**< Peripheral clock (PCLK) in Hz   */
     uint32_t          baudrate;     /**< Baudrate. Ex: 115200            */
     uart_mode_e       mode;         /**< Direction                       */
@@ -84,7 +84,6 @@ void uart_write_byte(USART_TypeDef *instance, uint8_t byte);
 void uart_write(USART_TypeDef *instance, const uint8_t *data, uint32_t len);
 void uart_write_string(USART_TypeDef *instance, const char *str);
 void uart_flush(USART_TypeDef *instance);
-
 
 /*
  * Read (non-blocking)
